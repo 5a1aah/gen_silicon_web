@@ -1,70 +1,178 @@
-# Getting Started with Create React App
+# Generative Silicon Website
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern, animated website for Generative Silicon - a cutting-edge startup revolutionizing the semiconductor industry through generative AI. The website showcases AI-powered ASIC design solutions with beautiful animations and a fully functional contact system.
 
-## Available Scripts
+## 🚀 Features
 
-In the project directory, you can run:
+- **Modern React Frontend**: Built with React 19 and Vite for optimal performance
+- **Beautiful Animations**: CSS keyframe animations with staggered entrance effects
+- **Responsive Design**: Mobile-first design that works on all devices
+- **Contact Form**: Fully functional contact form with backend integration
+- **Admin Panel**: Hidden admin panel to view contact submissions
+- **Database Integration**: MongoDB backend for persistent data storage
+- **Production Ready**: Configured for deployment on GitHub Pages with backend API
 
-### `npm start`
+## 🛠️ Tech Stack
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### Frontend
+- React 19
+- Vite
+- CSS3 with custom animations
+- Responsive design
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+### Backend
+- Node.js
+- Express.js
+- MongoDB with Mongoose
+- CORS and security middleware
+- Rate limiting
 
 ### Deployment
+- Frontend: GitHub Pages
+- Backend: Vercel/Railway
+- Database: MongoDB Atlas
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## 🎨 Animations
 
-### `npm run build` fails to minify
+The website features comprehensive animations including:
+- Fade-in effects with directional movement
+- Staggered entrance animations
+- Floating and glow effects
+- Hover animations on interactive elements
+- Smooth transitions throughout
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## 📱 Sections
+
+1. **Hero Section**: Eye-catching introduction with key statistics
+2. **Services**: ASIC Design, Verification, DFT Services, Physical Design
+3. **Solutions**: AI-powered verification automation highlights
+4. **About**: Company information and mission
+5. **Contact**: Functional contact form with validation
+6. **Admin Panel**: Hidden panel for viewing submissions
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 16+
+- npm or yarn
+
+### Local Development
+
+1. **Clone the repository**:
+   ```bash
+   git clone <your-repo-url>
+   cd gen_silicon_web
+   ```
+
+2. **Install frontend dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Set up backend** (optional for local development):
+   ```bash
+   cd server
+   npm install
+   cp .env.example .env
+   # Edit .env with your MongoDB URI
+   npm run dev
+   ```
+
+4. **Start frontend development server**:
+   ```bash
+   npm run dev
+   ```
+
+5. **Open your browser**: Navigate to `http://localhost:5173`
+
+## 🌐 Deployment
+
+For detailed deployment instructions, see [DEPLOYMENT.md](./DEPLOYMENT.md).
+
+### Quick Deployment Summary
+
+1. **Backend**: Deploy to Vercel/Railway with MongoDB Atlas
+2. **Frontend**: Push to GitHub and enable GitHub Pages
+3. **Environment Variables**: Set API URL in GitHub repository secrets
+
+## 🔧 Configuration
+
+### Environment Variables
+
+**Frontend** (`.env.local`):
+```env
+VITE_API_URL=http://localhost:3001
+```
+
+**Backend** (`server/.env`):
+```env
+MONGODB_URI=your-mongodb-connection-string
+FRONTEND_URL=http://localhost:5173
+ADMIN_SECRET_KEY=your-secret-key
+```
+
+## 🎯 Admin Panel
+
+Access the admin panel to view contact form submissions:
+
+1. Add `?admin=true` to the URL, or
+2. Triple-click the footer copyright text
+3. Enter the admin secret key when prompted
+
+## 📁 Project Structure
+
+```
+gen_silicon_web/
+├── src/
+│   ├── App.jsx          # Main React component
+│   ├── App.css          # Styles and animations
+│   ├── assets/          # Images and static files
+│   └── ...
+├── server/              # Backend API
+│   ├── server.js        # Express server
+│   ├── package.json     # Backend dependencies
+│   └── ...
+├── .github/workflows/   # GitHub Actions for deployment
+├── DEPLOYMENT.md        # Detailed deployment guide
+└── README.md           # This file
+```
+
+## 🎨 Customization
+
+### Colors and Branding
+Edit the CSS custom properties in `src/App.css`:
+```css
+:root {
+  --primary-color: #8b5cf6;
+  --secondary-color: #06b6d4;
+  /* ... */
+}
+```
+
+### Content
+Update the content in `src/App.jsx` to match your company information.
+
+### Animations
+Modify or add new animations in `src/App.css` using CSS keyframes.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 📞 Support
+
+For questions or support, please contact:
+- Email: salah.eddine.seecs@gmail.com
+- Phone: +212 6 20 41 03 17
+
+---
+
+**Built with ❤️ for the future of semiconductor design**
