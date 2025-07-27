@@ -28,6 +28,22 @@ The application consists of:
 
 ### Step 2: Deploy Backend to Vercel
 
+#### Option A: Vercel Web Interface (Recommended)
+
+1. Go to [vercel.com](https://vercel.com) and sign up/login
+2. Click "New Project"
+3. Import your GitHub repository
+4. Set the **Root Directory** to `server`
+5. Vercel will auto-detect it as a Node.js project
+6. Add environment variables in the deployment settings:
+   - `MONGODB_URI`: Your MongoDB Atlas connection string
+   - `FRONTEND_URL`: Your GitHub Pages URL (e.g., `https://yourusername.github.io/gen_silicon_web`)
+   - `ADMIN_SECRET_KEY`: A secure random string for admin access
+   - `NODE_ENV`: production
+7. Click "Deploy"
+
+#### Option B: Vercel CLI (If authentication works)
+
 1. Navigate to the `server` directory:
    ```bash
    cd server
@@ -38,23 +54,56 @@ The application consists of:
    npm install -g vercel
    ```
 
-3. Deploy to Vercel:
+3. Login to Vercel:
+   ```bash
+   vercel login
+   ```
+   
+4. Deploy to Vercel:
    ```bash
    vercel
    ```
 
-4. Set environment variables in Vercel dashboard:
+5. Set environment variables in Vercel dashboard (same as Option A)
+
+**Note**: If Vercel CLI authentication fails with "Account not found", use Option A (web interface) or try the alternative deployment options below.`
+
+### Alternative Deployment Options
+
+#### Option C: Railway (Easy GitHub Integration)
+
+1. Go to [Railway](https://railway.app) and sign up with GitHub
+2. Click "New Project" → "Deploy from GitHub repo"
+3. Select your repository
+4. Railway will auto-detect the Node.js app in the `server` folder
+5. Add environment variables in Railway dashboard:
    - `MONGODB_URI`: Your MongoDB Atlas connection string
-   - `FRONTEND_URL`: Your GitHub Pages URL (e.g., `https://yourusername.github.io/gen_silicon_web`)
-   - `ADMIN_SECRET_KEY`: A secure random string for admin access
-   - `NODE_ENV`: `production`
+   - `FRONTEND_URL`: Your GitHub Pages URL
+   - `ADMIN_SECRET_KEY`: A secure random string
+   - `NODE_ENV`: production
+6. Railway will automatically deploy and provide a URL
 
-### Alternative: Deploy to Railway
+#### Option D: Render (Free Tier Available)
 
-1. Go to [Railway](https://railway.app)
-2. Connect your GitHub repository
-3. Select the `server` folder as the root
-4. Set the same environment variables as above
+1. Go to [Render](https://render.com) and sign up
+2. Click "New" → "Web Service"
+3. Connect your GitHub repository
+4. Set:
+   - **Root Directory**: `server`
+   - **Build Command**: `npm install`
+   - **Start Command**: `npm start`
+5. Add the same environment variables as above
+6. Deploy
+
+#### Option E: Netlify Functions (Serverless)
+
+1. Go to [Netlify](https://netlify.com)
+2. Drag and drop your `server` folder or connect GitHub
+3. Netlify will detect it as a Node.js function
+4. Configure environment variables in site settings
+5. Deploy
+
+**Recommendation**: If Vercel web interface doesn't work, try Railway as it has excellent GitHub integration and is very developer-friendly.
 
 ## Frontend Deployment
 
