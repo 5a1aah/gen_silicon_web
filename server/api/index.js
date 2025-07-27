@@ -2,7 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const mongoose = require('mongoose');
+const { Sequelize, DataTypes } = require('sequelize');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -24,52 +25,73 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-// MongoDB connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/generative-silicon';
-
-mongoose.connect(MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('Connected to MongoDB'))
-.catch(err => console.error('MongoDB connection error:', err));
-
-// Contact submission schema
-const contactSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true,
-    maxlength: 100
-  },
-  email: {
-    type: String,
-    required: true,
-    trim: true,
-    lowercase: true,
-    maxlength: 255
-  },
-  company: {
-    type: String,
-    trim: true,
-    maxlength: 100
-  },
-  message: {
-    type: String,
-    required: true,
-    trim: true,
-    maxlength: 2000
-  },
-  timestamp: {
-    type: Date,
-    default: Date.now
-  },
-  ip: {
-    type: String
-  }
+// SQLite database setup
+const sequelize = new Sequelize({
+  dialect: 'sqlite',
+  storage: path.join(__dirname, 'database.sqlite'),
+  logging: process.env.NODE_ENV === 'development' ? console.log : false
 });
 
-const Contact = mongoose.model('Contact', contactSchema);
+// Contact model
+const Contact = sequelize.define('Contact', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  name: {
+    type: DataTypes.STRING(100),
+    allowNull: false,
+    validate: {
+      notEmpty: true,
+      len: [1, 100]
+    }
+  },
+  email: {
+    type: DataTypes.STRING(255),
+    allowNull: false,
+    validate: {
+      isEmail: true,
+      len: [1, 255]
+    }
+  },
+  company: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    validate: {
+      len: [0, 100]
+    }
+  },
+  message: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+    validate: {
+      notEmpty: true,
+      len: [1, 2000]
+    }
+  },
+  ip: {
+    type: DataTypes.STRING(45),
+    allowNull: true
+  }
+}, {
+  timestamps: true,
+  createdAt: 'timestamp',
+  updatedAt: false
+});
+
+// Initialize database
+sequelize.authenticate()
+  .then(() => {
+    console.log('Connected to SQLite database');
+    return sequelize.sync();
+  })
+  .then(() => {
+    console.log('Database synchronized');
+  })
+  .catch(err => {
+    console.error('Database connection error:', err);
+  });
 
 // Routes
 
@@ -98,23 +120,30 @@ app.post('/api/contact', async (req, res) => {
       });
     }
     
-    const contact = new Contact({
-      name,
-      email,
-      company: company || '',
-      message,
+    const contact = await Contact.create({
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      company: company ? company.trim() : null,
+      message: message.trim(),
       ip: req.ip
     });
     
-    await contact.save();
-    
     res.status(201).json({ 
       message: 'Contact form submitted successfully',
-      id: contact._id
+      id: contact.id
     });
     
   } catch (error) {
     console.error('Error saving contact:', error);
+    
+    // Handle Sequelize validation errors
+    if (error.name === 'SequelizeValidationError') {
+      const validationErrors = error.errors.map(err => err.message);
+      return res.status(400).json({ 
+        error: 'Validation error: ' + validationErrors.join(', ')
+      });
+    }
+    
     res.status(500).json({ 
       error: 'Internal server error. Please try again later.' 
     });
@@ -130,10 +159,11 @@ app.get('/api/contacts', async (req, res) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
     
-    const contacts = await Contact.find()
-      .sort({ timestamp: -1 })
-      .select('-ip')
-      .limit(100);
+    const contacts = await Contact.findAll({
+      attributes: { exclude: ['ip'] },
+      order: [['timestamp', 'DESC']],
+      limit: 100
+    });
     
     res.json(contacts);
     

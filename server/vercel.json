@@ -1,18 +1,19 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "server.js",
-      "use": "@vercel/node"
-    }
-  ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/server.js"
+      "dest": "/api/index.js"
     }
   ],
   "env": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "FRONTEND_URL": "https://salah-elabbassi.github.io/gen_silicon_web",
+    "ADMIN_SECRET_KEY": "salah_1234"
+  },
+  "functions": {
+    "api/index.js": {
+      "maxDuration": 10
+    }
   }
 }

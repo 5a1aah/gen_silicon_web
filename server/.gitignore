@@ -135,3 +135,8 @@ typings/
 # Vercel
 .vercel
 .vercel
+
+# SQLite Database
+database.sqlite
+*.sqlite
+*.db
