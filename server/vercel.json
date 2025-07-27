@@ -8,7 +8,7 @@
   ],
   "env": {
     "NODE_ENV": "production",
-    "FRONTEND_URL": "https://salah-elabbassi.github.io/gen_silicon_web",
+    "FRONTEND_URL": "https://5a1aah.github.io/gen_silicon_web",
     "ADMIN_SECRET_KEY": "salah_1234"
   },
   "functions": {
