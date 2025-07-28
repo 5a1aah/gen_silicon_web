@@ -2,8 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const { Sequelize, DataTypes } = require('sequelize');
-const path = require('path');
+const initSqlJs = require('sql.js');
 require('dotenv').config();
 
 const app = express();
@@ -25,73 +24,61 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-// SQLite database setup
-const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: process.env.NODE_ENV === 'production' ? ':memory:' : path.join(__dirname, 'database.sqlite'),
-  logging: process.env.NODE_ENV === 'development' ? console.log : false
-});
-
-// Contact model
-const Contact = sequelize.define('Contact', {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  name: {
-    type: DataTypes.STRING(100),
-    allowNull: false,
-    validate: {
-      notEmpty: true,
-      len: [1, 100]
-    }
-  },
-  email: {
-    type: DataTypes.STRING(255),
-    allowNull: false,
-    validate: {
-      isEmail: true,
-      len: [1, 255]
-    }
-  },
-  company: {
-    type: DataTypes.STRING(100),
-    allowNull: true,
-    validate: {
-      len: [0, 100]
-    }
-  },
-  message: {
-    type: DataTypes.TEXT,
-    allowNull: false,
-    validate: {
-      notEmpty: true,
-      len: [1, 2000]
-    }
-  },
-  ip: {
-    type: DataTypes.STRING(45),
-    allowNull: true
-  }
-}, {
-  timestamps: true,
-  createdAt: 'timestamp',
-  updatedAt: false
-});
+// SQLite database setup with sql.js
+let db = null;
 
 // Initialize database
-sequelize.authenticate()
-  .then(() => {
-    console.log('Connected to SQLite database');
-    return sequelize.sync();
-  })
-  .then(() => {
-    console.log('Database synchronized');
-  })
-  .catch(err => {
-    console.error('Database connection error:', err);
-  });
+const initDatabase = async () => {
+  const SQL = await initSqlJs();
+  db = new SQL.Database();
+  
+  // Create contacts table
+  db.run(`
+    CREATE TABLE IF NOT EXISTS contacts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL,
+      company TEXT,
+      message TEXT NOT NULL,
+      ip TEXT,
+      timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  
+  console.log('Connected to SQLite database');
+  console.log('Database synchronized');
+};
+
+// Contact operations
+const Contact = {
+  create: (data) => {
+    const stmt = db.prepare('INSERT INTO contacts (name, email, company, message, ip) VALUES (?, ?, ?, ?, ?)');
+    const result = stmt.run([data.name, data.email, data.company, data.message, data.ip]);
+    return { id: result.lastInsertRowid, ...data };
+  },
+  findAll: (options = {}) => {
+    let query = 'SELECT * FROM contacts';
+    if (options.attributes && options.attributes.exclude) {
+      const excludeFields = options.attributes.exclude;
+      const allFields = ['id', 'name', 'email', 'company', 'message', 'ip', 'timestamp'];
+      const selectFields = allFields.filter(field => !excludeFields.includes(field));
+      query = `SELECT ${selectFields.join(', ')} FROM contacts`;
+    }
+    if (options.order) {
+      query += ` ORDER BY ${options.order[0][0]} ${options.order[0][1]}`;
+    }
+    if (options.limit) {
+      query += ` LIMIT ${options.limit}`;
+    }
+    const stmt = db.prepare(query);
+    return stmt.all();
+  }
+};
+
+// Initialize database
+initDatabase().catch(err => {
+  console.error('Database connection error:', err);
+});
 
 // Routes
 
@@ -120,12 +107,19 @@ app.post('/api/contact', async (req, res) => {
       });
     }
     
-    const contact = await Contact.create({
+    // Length validation
+    if (name.length > 100 || email.length > 255 || message.length > 2000) {
+      return res.status(400).json({ 
+        error: 'Input exceeds maximum length' 
+      });
+    }
+    
+    const contact = Contact.create({
       name: name.trim(),
       email: email.trim().toLowerCase(),
       company: company ? company.trim() : null,
       message: message.trim(),
-      ip: req.ip
+      ip: req.ip || req.connection.remoteAddress
     });
     
     res.status(201).json({ 
@@ -134,32 +128,24 @@ app.post('/api/contact', async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Error saving contact:', error);
-    
-    // Handle Sequelize validation errors
-    if (error.name === 'SequelizeValidationError') {
-      const validationErrors = error.errors.map(err => err.message);
-      return res.status(400).json({ 
-        error: 'Validation error: ' + validationErrors.join(', ')
-      });
-    }
+    console.error('Contact form error:', error);
     
     res.status(500).json({ 
-      error: 'Internal server error. Please try again later.' 
+      error: 'Internal server error' 
     });
   }
 });
 
-// Get all contacts (admin only - simple auth with secret key)
-app.get('/api/contacts', async (req, res) => {
+// Admin route to get all contacts (protected)
+app.get('/api/admin/contacts', async (req, res) => {
   try {
     const adminKey = req.headers['x-admin-key'];
     
-    if (adminKey !== process.env.ADMIN_SECRET_KEY) {
+    if (!adminKey || adminKey !== process.env.ADMIN_SECRET_KEY) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
     
-    const contacts = await Contact.findAll({
+    const contacts = Contact.findAll({
       attributes: { exclude: ['ip'] },
       order: [['timestamp', 'DESC']],
       limit: 100
@@ -168,10 +154,8 @@ app.get('/api/contacts', async (req, res) => {
     res.json(contacts);
     
   } catch (error) {
-    console.error('Error fetching contacts:', error);
-    res.status(500).json({ 
-      error: 'Internal server error' 
-    });
+    console.error('Admin contacts error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
