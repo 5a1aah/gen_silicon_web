@@ -32,9 +32,7 @@ jobs:
       run: npm ci
       
     - name: Build
-      run: npm run build
-      env:
-          VITE_API_URL: https://gensilicon-18mixbxw0-salah-eddine-el-abbassis-projects.vercel.app
+        run: npm run build
         
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4

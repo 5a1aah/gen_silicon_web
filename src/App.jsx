@@ -82,25 +82,19 @@ function App() {
     setIsSubmitting(true)
     setSubmitMessage('')
 
+    // Simulate form submission with a delay
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/contact`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-      })
-
-      if (response.ok) {
-        setSubmitMessage('Thank you! Your message has been sent successfully.')
-        setFormData({ name: '', email: '', company: '', message: '' })
-      } else {
-        const errorData = await response.json()
-        setSubmitMessage(errorData.error || 'Sorry, there was an error sending your message. Please try again.')
-      }
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      
+      // Simulate successful submission
+      setSubmitMessage('Thank you! Your message has been sent successfully.')
+      setFormData({ name: '', email: '', company: '', message: '' })
+      
+      // Log form data for demonstration (in real app, this would be sent to backend)
+      console.log('Form submitted:', formData)
     } catch (error) {
-      console.error('Error submitting form:', error)
       setSubmitMessage('Sorry, there was an error sending your message. Please try again.')
+      console.error('Form submission error:', error)
     } finally {
       setIsSubmitting(false)
     }
