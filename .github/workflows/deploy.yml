@@ -34,7 +34,7 @@ jobs:
     - name: Build
       run: npm run build
       env:
-          VITE_API_URL: https://gensilicon-okfwphf0e-salah-eddine-el-abbassis-projects.vercel.app
+          VITE_API_URL: https://gensilicon-97a09vrnc-salah-eddine-el-abbassis-projects.vercel.app
         
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4

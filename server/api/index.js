@@ -28,7 +28,7 @@ app.use('/api/', limiter);
 // SQLite database setup
 const sequelize = new Sequelize({
   dialect: 'sqlite',
-  storage: path.join(__dirname, 'database.sqlite'),
+  storage: process.env.NODE_ENV === 'production' ? ':memory:' : path.join(__dirname, 'database.sqlite'),
   logging: process.env.NODE_ENV === 'development' ? console.log : false
 });
 
